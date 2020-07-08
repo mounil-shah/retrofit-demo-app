@@ -18,6 +18,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
+import android.widget.Toolbar;
 
 import java.util.List;
 
@@ -43,12 +44,14 @@ public class UserFragmentList extends Fragment implements UsersAdapter.ClickedIt
         usersAdapter = new UsersAdapter(this);
         recyclerView.setAdapter(usersAdapter);
         usersViewModel = ViewModelProviders.of(this).get(UsersViewModel.class);
-        usersViewModel.getUserResponsesLiveDate().observe(this, new Observer<List<UserResponse>>() {
-            @Override
-            public void onChanged(List<UserResponse> userResponses) {
-                if (userResponses != null)
-                    usersAdapter.setData(userResponses);
-            }
+        usersViewModel.getUserResponsesLiveDate().observe(getViewLifecycleOwner(), userResponses -> {
+            if (userResponses != null)
+                usersAdapter.setData(userResponses);
+        });
+
+        usersViewModel.getUserResponseErrorLiveData().observe(getViewLifecycleOwner(), error -> {
+            if (error != null)
+                Toast.makeText(requireContext(), "User List couldn't be fetched", Toast.LENGTH_LONG).show();
         });
     }
 

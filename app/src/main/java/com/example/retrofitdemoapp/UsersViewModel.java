@@ -7,21 +7,18 @@ import java.util.List;
 
 public class UsersViewModel extends ViewModel {
 
-    LiveData<List<UserResponse>> userResponsesLiveDate;
+    private UserRepositoryRetrofit userRepository;
+
+    public UsersViewModel() {
+        userRepository = new UserRepositoryRetrofit();
+    }
 
     public LiveData<List<UserResponse>> getUserResponsesLiveDate() {
-        return userResponsesLiveDate;
+        return userRepository.getUserListLiveData();
     }
 
-    UsersRepositoryInterface usersRepository;
-
-
-    public UsersViewModel(){
-        usersRepository = new UserRepositoryRetrofit();
-        userResponsesLiveDate = usersRepository.getUsers();
-
+    public LiveData<String> getUserResponseErrorLiveData() {
+        return userRepository.getUserListErrorLiveData();
     }
-
-
 
 }

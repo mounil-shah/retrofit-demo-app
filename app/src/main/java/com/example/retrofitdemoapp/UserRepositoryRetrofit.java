@@ -1,51 +1,55 @@
 package com.example.retrofitdemoapp;
 
-import android.util.Log;
-
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
+import java.io.IOException;
 import java.util.List;
 
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class UserRepositoryRetrofit implements UsersRepositoryInterface {
-    @Override
-    public LiveData<List<UserResponse>> getUsers() {
-        return userResponsesMutableLiveDate;
-    }
-
+//public class UserRepositoryRetrofit implements UsersRepositoryInterface {
+public class UserRepositoryRetrofit {
+    public UserService userService;
     public UserRepositoryRetrofit() {
+        userService = ApiClient.getUserService();
+        getUsers();
+    }
+    final MutableLiveData<List<UserResponse>> userListMutableLiveData = new MutableLiveData<>();
+    final MutableLiveData<String> userListErrorMutableLiveData = new MutableLiveData<>();
 
-        getAllUsers();
-
+    public LiveData<List<UserResponse>> getUserListLiveData() {
+        return userListMutableLiveData;
     }
 
-    MutableLiveData<List<UserResponse>> userResponsesMutableLiveDate =
-            new MutableLiveData<>();
+    public LiveData<String> getUserListErrorLiveData() {
+        return userListErrorMutableLiveData;
+    }
 
-    public void getAllUsers(){
-
-        Call<List<UserResponse>> userList = ApiClient.getUserService().getAllUsers();
+    private void getUsers() {
+        Call<List<UserResponse>> userList = userService.getAllUsers();
         userList.enqueue(new Callback<List<UserResponse>>() {
             @Override
             public void onResponse(Call<List<UserResponse>> call, Response<List<UserResponse>> response) {
-
                 if (response.isSuccessful()) {
-                    List<UserResponse> userResponses = response.body();
-                    //usersAdapter.setData(userResponses);
-                    userResponsesMutableLiveDate.postValue(userResponses);
-                    Log.e("Success", response.body().toString());
+                    userListMutableLiveData.postValue(response.body());
+                }
+                else {
+                    try {
+                        userListErrorMutableLiveData.postValue(response.errorBody().string());
+                    } catch (IOException e) {
+                        userListErrorMutableLiveData.postValue(e.toString());
+                    }
                 }
             }
 
             @Override
             public void onFailure(Call<List<UserResponse>> call, Throwable t) {
-                Log.e("Failure", t.getLocalizedMessage());
+                userListErrorMutableLiveData.postValue(t.toString());
             }
         });
-
     }
+
 }
