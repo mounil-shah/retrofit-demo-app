@@ -14,7 +14,7 @@ import retrofit2.Response;
 public class UserRepositoryRetrofit {
     public UserService userService;
     public UserRepositoryRetrofit() {
-        userService = ApiClient.getUserService();
+        userService = ApiClient.INSTANCE.createUserService();
         getUsers();
     }
     final MutableLiveData<List<UserResponse>> userListMutableLiveData = new MutableLiveData<>();

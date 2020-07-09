@@ -16,7 +16,8 @@ public class UsersAdapter extends RecyclerView.Adapter<UsersAdapter.UsersAdapter
     private List<UserResponse> userResponseList = new ArrayList<>();
     private Context context;
     private ClickedItem clickedItem;
-
+//    private ClickedItem clickedItem;
+// replace with high order function that replaces need for interface
     public UsersAdapter(ClickedItem clickedItem) {
         this.clickedItem = clickedItem;
     }
