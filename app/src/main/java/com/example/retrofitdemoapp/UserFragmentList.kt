@@ -6,6 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentTransaction
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Observer
@@ -23,23 +24,28 @@ class UserFragmentList : Fragment() {
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
-        usersAdapter = UsersAdapter(lambdaForItemClick)
+        usersAdapter = UsersAdapter { userResponse ->
+            usersViewModel.setSelectedUser(userResponse)
+            val userDetails = UserDetailsFragment()
+            requireActivity().supportFragmentManager.safeFragmentTransaction {
+                replace(R.id.placeHolder, userDetails)
+                setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
+
+            }
+        }
         userList.layoutManager = LinearLayoutManager(activity)
         userList.adapter = usersAdapter
         usersViewModel.getUserResponsesLiveData().observe(viewLifecycleOwner, Observer { userResponses: List<UserResponse>? -> if (userResponses != null) usersAdapter!!.setData(userResponses) })
         usersViewModel.getUserResponseErrorLiveData().observe(viewLifecycleOwner, Observer { error: String? -> if (error != null) Toast.makeText(requireContext(), "User List couldn't be fetched", Toast.LENGTH_LONG).show() })
     }
 
-    val lambdaForItemClick = { userResponse: UserResponse ->
-        usersViewModel.setSelectedUser(userResponse)
-        val userDetails = UserDetailsFragment()
-        val fragmentManager = requireActivity().supportFragmentManager
-        val fragmentTransaction = fragmentManager.beginTransaction()
-        fragmentTransaction.replace(R.id.placeHolder, userDetails)
-        fragmentTransaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
-        fragmentTransaction.addToBackStack(null)
-        fragmentTransaction.commit()
-        Unit
-    }
-
 }
+
+fun FragmentManager.safeFragmentTransaction (block: FragmentTransaction.() -> Unit ) {
+    val fragmentTransaction = this.beginTransaction()
+    fragmentTransaction.block()
+    fragmentTransaction.addToBackStack(null)
+    fragmentTransaction.commit()
+}
+
+

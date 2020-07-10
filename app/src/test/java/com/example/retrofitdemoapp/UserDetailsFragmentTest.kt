@@ -63,4 +63,21 @@ class UserDetailsFragmentTest {
     fun test(){
         myHighOrderFunction3 { 6 }
     }
+
+    fun sillyString2(string: String): String{
+        return string + "dog"
+    }
+
+    @Test
+    fun test2(){
+        println(sillyString2("hello"))
+        val hello = "hello"
+        println(hello.sillyString())
+        "".sillyString()
+    }
+
+    fun String.sillyString(): String{
+        return this + "cat"
+    }
+
 }
