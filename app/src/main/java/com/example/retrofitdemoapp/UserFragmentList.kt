@@ -10,11 +10,9 @@ import androidx.fragment.app.FragmentTransaction
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
-import com.example.retrofitdemoapp.UsersAdapter.ClickedItem
 import kotlinx.android.synthetic.main.fragment_user_list.*
 
-class UserFragmentList : Fragment(), ClickedItem {
+class UserFragmentList : Fragment() {
     var usersAdapter: UsersAdapter? = null
     val usersViewModel by activityViewModels<UsersViewModel>()
 
@@ -25,32 +23,23 @@ class UserFragmentList : Fragment(), ClickedItem {
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
-        usersAdapter = UsersAdapter(this)
+        usersAdapter = UsersAdapter(lambdaForItemClick)
         userList.layoutManager = LinearLayoutManager(activity)
         userList.adapter = usersAdapter
-        usersViewModel.getUserResponsesLiveData().observe(viewLifecycleOwner, Observer { userResponses: List<UserResponse?>? -> if (userResponses != null) usersAdapter!!.setData(userResponses) })
+        usersViewModel.getUserResponsesLiveData().observe(viewLifecycleOwner, Observer { userResponses: List<UserResponse>? -> if (userResponses != null) usersAdapter!!.setData(userResponses) })
         usersViewModel.getUserResponseErrorLiveData().observe(viewLifecycleOwner, Observer { error: String? -> if (error != null) Toast.makeText(requireContext(), "User List couldn't be fetched", Toast.LENGTH_LONG).show() })
     }
 
-
-    override fun ClickedUser(userResponse: UserResponse) {
-        Toast.makeText(context, "This is clicked", Toast.LENGTH_LONG).show()
-        val userDetails = UserDetailsFragment()
+    val lambdaForItemClick = { userResponse: UserResponse ->
         usersViewModel.setSelectedUser(userResponse)
-        val fragmentManager = activity!!.supportFragmentManager
+        val userDetails = UserDetailsFragment()
+        val fragmentManager = requireActivity().supportFragmentManager
         val fragmentTransaction = fragmentManager.beginTransaction()
         fragmentTransaction.replace(R.id.placeHolder, userDetails)
         fragmentTransaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
         fragmentTransaction.addToBackStack(null)
         fragmentTransaction.commit()
+        Unit
     }
 
-    fun higherOrderFunctionToUpdateUserSelectionAndNavigateToNextFragment(blockOfCode: (UserResponse) -> Unit){
-        blockOfCode(UserResponse)
-    }
-
-    fun updateUserSelection(userResponse: UserResponse) {
-        usersViewModel.setSelectedUser(userResponse)
-
-    }
 }
